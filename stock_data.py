@@ -72,26 +72,7 @@ def df2mysql(conn, cursor, db_name, table_name, df, uk, drop_table=False):
     rowcount = cursor.executemany(make_replace_sql(table_name,df), values)
     print('REPLACE {} rows into {}'.format(rowcount, table_name))
 
-
-# 设定获取日线行情的初始日期和终止日期，其中终止日期设定为昨天。
-start_dt = '20200206'
-time_temp = datetime.datetime.now() - datetime.timedelta(days=10)
-end_dt = time_temp.strftime('%Y%m%d')
-# 设定需要获取数据的股票池
-stock_pool = ['600036.SH','000001.SZ','002142.SZ','002807.SZ','002839.SZ','002936.SZ','002948.SZ','002958.SZ','002966.SZ','600000.SH','600015.SH','600016.SH','600908.SH','600919.SH','600926.SH','600928.SH','601009.SH','601077.SH','601128.SH','601166.SH','601169.SH','601229.SH','601288.SH','601328.SH','601398.SH','601577.SH','601658.SH','601818.SH','601838.SH','601860.SH','601916.SH','601939.SH','601988.SH','601997.SH','601998.SH','603323.SH']
-#数据目录
-data_dir='/home/dream/workspace/tushare/'
-output_data_dir='/home/dream/workspace/autokeras/stock/'
-# 建立数据库连接
-db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-db.autocommit(1)
-cursor = db.cursor()
-
-# 设置tushare pro的token并获取连接
-#ts.set_token('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-pro = ts.pro_api()
-
-try:
+def download_stock_data():
     stock_basic = pro.stock_basic(exchange='', list_status='', fields='ts_code,symbol,name,area,industry,fullname,enname,market,exchange,curr_type,list_status,list_date,delist_date,is_hs')
     pd.DataFrame(stock_basic).to_csv(data_dir+'股票列表.csv', index=False)
     df2mysql(conn=db, cursor=cursor, db_name='stock', table_name='stock_basic' , df=stock_basic, uk='ts_code')
@@ -131,6 +112,40 @@ try:
         print("daily:"+ts_code)
         daily1 = pro.daily(ts_code=ts_code)
         df2mysql(conn=db, cursor=cursor, db_name='stock', table_name='daily' , df=daily1, uk='ts_code,trade_date')
+    
+    
+def generate_train_data():
+    train_data = pd.DataFrame()
+    for ts_code in stock_pool:
+        trade_date = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y%m%d')
+        cursor.execute("select * from daily where ts_code='{}' and trade_date='{}'".format(ts_code, trade_date))
+        daily_data = cursor.fetchall()
+        for single_row in daily_data:
+            print(single_row)
+
+# 设定获取日线行情的初始日期和终止日期，其中终止日期设定为昨天。
+start_dt = '20200206'
+time_temp = datetime.datetime.now() - datetime.timedelta(days=10)
+end_dt = time_temp.strftime('%Y%m%d')
+# 设定需要获取数据的股票池
+stock_pool = ['600036.SH','000001.SZ','002142.SZ','002807.SZ','002839.SZ','002936.SZ','002948.SZ','002958.SZ','002966.SZ','600000.SH','600015.SH','600016.SH','600908.SH','600919.SH','600926.SH','600928.SH','601009.SH','601077.SH','601128.SH','601166.SH','601169.SH','601229.SH','601288.SH','601328.SH','601398.SH','601577.SH','601658.SH','601818.SH','601838.SH','601860.SH','601916.SH','601939.SH','601988.SH','601997.SH','601998.SH','603323.SH']
+#数据目录
+data_dir='/home/dream/workspace/tushare/'
+output_data_dir='/home/dream/workspace/autokeras/stock/'
+# 建立数据库连接
+db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
+db.autocommit(1)
+cursor = db.cursor()
+
+# 设置tushare pro的token并获取连接
+#ts.set_token('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+pro = ts.pro_api()
+
+try:
+#     download_stock_data()
+    generate_train_data()
+    
+    
 #         daily = pd.concat([daily,daily1],ignore_index=True)
 #     pd.DataFrame(daily).to_csv(data_dir+'日线行情.csv', index=False)
 #     df2mysql(conn=db, cursor=cursor, db_name='stock', table_name='daily' , df=daily, uk='ts_code,trade_date')
