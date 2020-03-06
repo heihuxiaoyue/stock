@@ -176,31 +176,36 @@ cursor = db.cursor()
 #ts.set_token('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 pro = ts.pro_api()
 
+loopCount = 100
 try:
-    # download_stock_data()
-   generate_train_data()
-    
-    
-#         daily = pd.concat([daily,daily1],ignore_index=True)
-#     pd.DataFrame(daily).to_csv(data_dir+'日线行情.csv', index=False)
-#     df2mysql(conn=db, cursor=cursor, db_name='stock', table_name='daily' , df=daily, uk='ts_code,trade_date')
-     
-#     image_input = ak.ImageInput()
-#     image_output = ak.ImageBlock()(image_input)
-#     text_input = ak.TextInput()
-#     text_output = ak.TextBlock()(text_input)
-#     output = ak.Merge()([image_output, text_output])
-#     classification_output = ak.ClassificationHead()(output)
-#     regression_output = ak.RegressionHead()(output)
-#     ak.AutoModel(
-#         inputs=[image_input, text_input],
-#         outputs=[classification_output, regression_output]
-#     )
-         
+    while loopCount > 0:
+        try:
+            download_stock_data()
+            generate_train_data()
 
+
+            #     daily = pd.concat([daily,daily1],ignore_index=True)
+            # pd.DataFrame(daily).to_csv(data_dir+'日线行情.csv', index=False)
+            # df2mysql(conn=db, cursor=cursor, db_name='stock', table_name='daily' , df=daily, uk='ts_code,trade_date')
+            #
+            # image_input = ak.ImageInput()
+            # image_output = ak.ImageBlock()(image_input)
+            # text_input = ak.TextInput()
+            # text_output = ak.TextBlock()(text_input)
+            # output = ak.Merge()([image_output, text_output])
+            # classification_output = ak.ClassificationHead()(output)
+            # regression_output = ak.RegressionHead()(output)
+            # ak.AutoModel(
+            #     inputs=[image_input, text_input],
+            #     outputs=[classification_output, regression_output]
+            # )
+            loopCount = 0
+        except Exception as e:
+            loopCount = loopCount - 1
+            print('发生了异常：', loopCount, e)
 finally:
-    print('All Finished!')
-    cursor.close();
-    db.close();
-    
-    
+    print('All Finished!', loopCount)
+    cursor.close()
+    db.close()
+
+
