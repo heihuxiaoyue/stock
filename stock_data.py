@@ -174,7 +174,17 @@ def generate_train_data():
                     cur_row.append(daily[0][9])
                     cur_row.append(daily[0][10])
                 else:
-                    skip = True
+                    # skip = True
+                    cur_row.append('')
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
+                    cur_row.append(0.0)
                     logging.debug("[{}] 获取历史daily值为空: {} {}".format(loopCount, ts_code, trade_date))
             # 目标值
             shift = i-1
@@ -224,7 +234,7 @@ loopCount = 0
 try:
     while loopCount < maxLoopCount:
         try:
-            download_stock_data()
+            # download_stock_data()
             generate_train_data()
 
 
