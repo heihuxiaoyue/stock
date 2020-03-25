@@ -304,8 +304,6 @@ def generate_T_data():
         for i in range(c_len):
             cur_row = []
             if i + prepare_len < c_len:
-                cur_row.append(df.loc[i]['low'])
-                cur_row.append(df.loc[i]['high'])
                 for j in range(1, prepare_len+1):
                     index = i + j
                     cur_row.append(df.loc[index]['ts_code'])
@@ -319,12 +317,16 @@ def generate_T_data():
                     cur_row.append(df.loc[index]['pct_chg'])
                     cur_row.append(df.loc[index]['vol'])
                     cur_row.append(df.loc[index]['amount'])
+                cur_row.append(df.loc[i]['low'])
+                cur_row.append(df.loc[i]['high'])
                 train_row = pd.DataFrame(np.expand_dims(cur_row, axis=0))
                 if empty_csv:
                     train_row.to_csv(output_data_dir+"train.csv", sep=',', index=False, mode='w', header=True)
                     empty_csv = False
                 else:
                     train_row.to_csv(output_data_dir+"train.csv", sep=',', index=False, mode='a', header=False)
+            else:
+                logging.info("[{}] {} i({}) + prepare_len({}) >= c_len({})".format(loopCount, ts_code, i, prepare_len, c_len))
 
     empty_csv = True
     for ts_code in stock_pool:
